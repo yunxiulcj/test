@@ -1,0 +1,75 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 3197263 */
+  src: url('iconfont.woff2?t=1646028014592') format('woff2'),
+       url('iconfont.woff?t=1646028014592') format('woff'),
+       url('iconfont.ttf?t=1646028014592') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-userManage:before {
+  content: "\e642";
+}
+
+.icon-exit:before {
+  content: "\e600";
+}
+
+.icon-user:before {
+  content: "\e6a2";
+}
+
+.icon-userGroup:before {
+  content: "\e636";
+}
+
+.icon-systemManage:before {
+  content: "\e6ae";
+}
+
+.icon-show:before {
+  content: "\ebcc";
+}
+
+.icon-hidden:before {
+  content: "\ebcd";
+}
+
+.icon-ChooseToApp:before {
+  content: "\e627";
+}
+
+.icon-SetVisibility:before {
+  content: "\e8ba";
+}
+
+.icon-noticeManage:before {
+  content: "\e6c0";
+}
+
+.icon-appManage:before {
+  content: "\eb8f";
+}
+
+.icon-sessionManage:before {
+  content: "\e663";
+}
+
+.icon-vmManage:before {
+  content: "\e655";
+}
+
+.icon-deliveryGroupManage:before {
+  content: "\e60f";
+}
+
+.icon-strategyManage:before {
+  content: "\e611";
+}
+

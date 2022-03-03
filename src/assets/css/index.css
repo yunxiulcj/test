@@ -1,0 +1,11 @@
+html,body{
+    margin: 0;
+    padding: 0;
+}
+.pageWrap{
+    width:calc(100% - 30px);
+    height: calc(100% - 30px);
+    padding: 15px;
+    overflow: auto;
+}
+

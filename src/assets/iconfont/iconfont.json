@@ -1,0 +1,114 @@
+{
+  "id": "3197263",
+  "name": "positiveSWMgr",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "4511910",
+      "name": "用户管理",
+      "font_class": "userManage",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "249478",
+      "name": "退出编辑",
+      "font_class": "exit",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "145742",
+      "name": "用户_填充",
+      "font_class": "user",
+      "unicode": "e6a2",
+      "unicode_decimal": 59042
+    },
+    {
+      "icon_id": "5231851",
+      "name": "用户组织",
+      "font_class": "userGroup",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "12884221",
+      "name": "系统管理",
+      "font_class": "systemManage",
+      "unicode": "e6ae",
+      "unicode_decimal": 59054
+    },
+    {
+      "icon_id": "5388069",
+      "name": "眼睛_显示_o",
+      "font_class": "show",
+      "unicode": "ebcc",
+      "unicode_decimal": 60364
+    },
+    {
+      "icon_id": "5388071",
+      "name": "眼睛_隐藏_o",
+      "font_class": "hidden",
+      "unicode": "ebcd",
+      "unicode_decimal": 60365
+    },
+    {
+      "icon_id": "7401775",
+      "name": "选择应用",
+      "font_class": "ChooseToApp",
+      "unicode": "e627",
+      "unicode_decimal": 58919
+    },
+    {
+      "icon_id": "24273717",
+      "name": "设置可见性",
+      "font_class": "SetVisibility",
+      "unicode": "e8ba",
+      "unicode_decimal": 59578
+    },
+    {
+      "icon_id": "715531",
+      "name": "公告",
+      "font_class": "noticeManage",
+      "unicode": "e6c0",
+      "unicode_decimal": 59072
+    },
+    {
+      "icon_id": "4347582",
+      "name": "icon_应用管理",
+      "font_class": "appManage",
+      "unicode": "eb8f",
+      "unicode_decimal": 60303
+    },
+    {
+      "icon_id": "6992598",
+      "name": "当前会话",
+      "font_class": "sessionManage",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "11968890",
+      "name": "虚拟机（KVM）",
+      "font_class": "vmManage",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "12560370",
+      "name": "计算机组",
+      "font_class": "deliveryGroupManage",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "20104469",
+      "name": "策略管理",
+      "font_class": "strategyManage",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    }
+  ]
+}

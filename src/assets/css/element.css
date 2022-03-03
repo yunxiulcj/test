@@ -1,0 +1,37 @@
+::-webkit-scrollbar {
+  width: 7px;
+  height: 5px;
+  border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: #ffff;
+  border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  height: 5px;
+  background-color: rgba(144, 147, 153, 0.5);
+  border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  width: 7px;
+  background-color: rgba(144, 147, 153, 0.5);
+  border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+
+.formWrap .el-form-item__label{
+  line-height: 20px;
+  padding-bottom: 3px;
+}
+.formWrap .el-form-item{
+  margin-bottom: 15px;
+}
+.radioTable .el-table__header-wrapper .el-checkbox {
+  display: none;
+}
