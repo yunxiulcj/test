@@ -63,7 +63,7 @@
     <div class="tableWrap">
       <table-temp :config="config" ref="table"></table-temp>
     </div>
-    <el-dialog :visible.sync="showSessionDetail" width="800px">
+    <el-dialog :visible.sync="showSessionDetail" width="65%">
       <template slot="title">
         <div
           style="
@@ -73,7 +73,7 @@
             padding-left: 10px;
           "
         >
-          会话详情
+          会话详情<span class="titleSub">（{{tempDnsName}}）</span> 
         </div>
       </template>
       <table-temp :config="sessionConfig" ref="sessionTable"></table-temp>
@@ -95,6 +95,7 @@ export default {
   },
   data() {
     return {
+      tempDnsName:'',
       DeliveryGroupList: [],
       DNSList: [],
       loading1: false,
@@ -146,7 +147,8 @@ export default {
             prop: 'SessionCount',
             label: '会话数',
             click: (row) => {
-              if (row.DeliveryGroupId && row.SessionCount) {
+              if (row.DeliveryGroupId && row.SessionCount>0) {
+                this.tempDnsName=row.MachineDNSName
                 this.showSessionDetail = true
                 this.sessionConfig.condition.DeliveryGroupId =
                   row.DeliveryGroupId
@@ -209,10 +211,6 @@ export default {
           {
             prop: 'UserName',
             label: '用户名',
-          },
-          {
-            prop: 'SessionStatusStr',
-            label: '会话类型',
           },
           {
             prop: 'SessionStatusStr',
@@ -332,7 +330,7 @@ export default {
     },
     getDeliveryGroup(val) {
       this.loading1 = true
-      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: 5 })
+      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: this.$store.getters.symSetting.remoteReturnNum })
         .then((res) => {
           this.DeliveryGroupList = res.items
         })
@@ -342,7 +340,7 @@ export default {
     },
     getDNS(val) {
       this.loading2 = true
-      this.$http('GetDataList', { DataType: 1, LikeName: val, ItemsCount: 5 })
+      this.$http('GetDataList', { DataType: 1, LikeName: val, ItemsCount: this.$store.getters.symSetting.remoteReturnNum })
         .then((res) => {
           this.DNSList = res.items
         })
@@ -353,4 +351,9 @@ export default {
   },
 }
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.titleSub{
+  color: #228be6;
+  font-size: 13px;
+}
+</style>

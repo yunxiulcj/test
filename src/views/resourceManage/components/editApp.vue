@@ -9,7 +9,7 @@
           padding-left: 10px;
         "
       >
-        编辑应用
+        {{ dialogTitle }}
       </div>
     </template>
     <!-- <el-tabs v-model="activeName">
@@ -31,14 +31,18 @@
           clearable
         ></el-input>
       </el-form-item> -->
-      <el-form-item label="命令行参数(可选)" prop="ParamsData">
+      <el-form-item
+        label="命令行参数(可选)"
+        prop="ParamsData"
+        v-if="type==1"
+      >
         <el-input
           v-model="formObj.ParamsData"
           placeholder="例：http://www.example.com"
           clearable
         ></el-input>
       </el-form-item>
-      <el-form-item label="应用名称(面向用户)" prop="ApplicationDisplayname">
+      <el-form-item :label="type==1?'应用名称(面向用户)':'桌面名称(面向用户)'" prop="ApplicationDisplayname">
         <el-input
           v-model="formObj.ApplicationDisplayname"
           placeholder="例：Internet Explore"
@@ -53,14 +57,18 @@
           disabled
         ></el-input>
       </el-form-item> -->
-      <el-form-item label="应用说明和关键字" prop="DescriptionStr">
+      <el-form-item :label="type==1?'应用说明和关键字':'桌面说明和关键字'" prop="DescriptionStr">
         <el-input
           v-model="formObj.DescriptionStr"
           placeholder="例：Internet Explore-站点"
           clearable
         ></el-input>
       </el-form-item>
-      <el-form-item label="应用分类" style="margin-buttom: 10px">
+      <el-form-item
+        label="应用分类"
+        style="margin-buttom: 10px"
+        v-if="type==1"
+      >
         <span slot="label">
           应用分类
           <el-tooltip
@@ -72,7 +80,6 @@
             <i class="el-icon-info"></i>
           </el-tooltip>
         </span>
-
         <el-input
           v-model="formObj.CategoryName"
           placeholder="请输入应用分类"
@@ -106,21 +113,18 @@
       <el-form-item label="交付组">
         <el-select
           v-model="formObj.DeliveryGroupIds"
-          multiple
           filterable
           remote
-          reserve-keyword
           placeholder="请输入交付组关键词"
           :remote-method="getDeliveryGroup"
           :loading="loading1"
           style="width: 370px"
-          value-key="DeliveryGroupName"
         >
           <el-option
             v-for="item in DeliveryGroupList"
             :key="item.DeliveryGroupId"
             :label="item.DeliveryGroupName"
-            :value="item"
+            :value="item.DeliveryGroupId"
           >
           </el-option>
         </el-select>
@@ -140,6 +144,7 @@
 </template>
 
 <script>
+import { clone } from '@/utils/obj-operation.js'
 export default {
   name: 'editApp',
   props: {
@@ -149,8 +154,10 @@ export default {
   data() {
     return {
       users: [],
+      type: 1,
       activeName: 'form',
       DeliveryGroupList: [],
+      dialogTitle: '编辑桌面',
       loading: false,
       loading1: false,
       tempVal: false,
@@ -166,7 +173,6 @@ export default {
         Accounts: [],
         DeliveryGroupIds: [],
       },
-      formRules: {},
     }
   },
   watch: {
@@ -183,7 +189,7 @@ export default {
         this.loading = true
         this.$http('GetUserANDUserGroup', {
           LikeName: query,
-          ItemsCount: 5,
+          ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
           DataType: -1,
         })
           .then((res) => {
@@ -208,7 +214,11 @@ export default {
     },
     getDeliveryGroup(val) {
       this.loading1 = true
-      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: 5 })
+      this.$http('GetDataList', {
+        DataType: 0,
+        LikeName: val,
+        ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
+      })
         .then((res) => {
           this.DeliveryGroupList = res.items.map((item) => {
             return { DeliveryGroupId: item.Value, DeliveryGroupName: item.Name }
@@ -218,28 +228,32 @@ export default {
           this.loading1 = false
         })
     },
-    initFormObj(data) {
+    initFormObj(data, type) {
+      this.dialogTitle = type == 1 ? '编辑应用' : '编辑桌面'
+      this.type = type
       this.formObj.AppId = data.AppId
       this.formObj.ParamsData = data.ParamsData
       this.formObj.ApplicationDisplayname = data.ApplicationDisplayname
       this.formObj.DescriptionStr = data.DescriptionStr
       this.formObj.CategoryName = data.CategoryName
       this.formObj.Accounts = data.Accounts
-      this.formObj.DeliveryGroupIds = data.DeliveryGroups
-       data.Accounts.map((item) => {
+      this.formObj.DeliveryGroupIds = data.DeliveryGroups[0].DeliveryGroupId
+      data.Accounts.map((item) => {
         if (item.Type == 0) {
           item['icon'] = 'user'
         } else {
           item['icon'] = 'userGroup'
         }
       })
-      this.users =data.Accounts
+      this.users = data.Accounts
       this.DeliveryGroupList = data.DeliveryGroups
     },
     confirm() {
       this.$refs['formObj'].validate((valid) => {
         if (valid) {
-          this.$http('UpdateApp', this.formObj).then((res) => {
+          let temp = clone(this.formObj)
+          temp.DeliveryGroupIds = [this.formObj.DeliveryGroupIds]
+          this.$http('UpdateApp', temp).then((res) => {
             this.$message.success(res.errMsg)
             this.$emit('input', false)
           })

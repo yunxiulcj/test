@@ -1,6 +1,16 @@
 <template>
   <div class="pageWrap">
     <el-form inline size="small">
+      <el-form-item label="资源类型">
+        <el-select v-model="config.condition.ResourcesType">
+          <el-option
+            v-for="item in ResourcesType"
+            :key="item.value"
+            :value="item.value"
+            :label="item.label"
+          ></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="启用状态">
         <el-select v-model="config.condition.Enable">
           <el-option
@@ -11,9 +21,9 @@
           ></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="应用名称">
+      <el-form-item>
         <el-input
-          placeholder="输入应用名称查询"
+          placeholder="输入资源名称查询"
           v-model="config.condition.ApplicationName"
           style="width: 215px"
           clearable
@@ -32,7 +42,7 @@
           size="small"
           @click="Release"
           icon="el-icon-s-promotion"
-          >发布应用</el-button
+          >发布资源</el-button
         >
         <el-button
           type="primary"
@@ -48,14 +58,18 @@
       <table-temp :config="config" ref="table">
         <template slot-scope="scope" slot="appName">
           <span class="iconBox">
-            <img :src="baseUrl+scope.row.IcoPath" width="18px" />
+            <img :src="baseUrl + scope.row.IcoPath" width="18px" />
           </span>
-          <span style="margin-left:5px">{{ scope.row.ApplicationName }}</span>
+          <span style="margin-left: 5px">{{ scope.row.ApplicationName }}</span>
         </template>
       </table-temp>
     </div>
     <edit-app v-model="showEditApp" ref="edit-app"></edit-app>
-    <release-app v-model="showReleaseApp" ref="release-app" @getDataFlag="getData"></release-app>
+    <release-app
+      v-model="showReleaseApp"
+      ref="release-app"
+      @getDataFlag="getData"
+    ></release-app>
     <el-dialog :visible.sync="showAppDetail">
       <template slot="title">
         <div
@@ -93,38 +107,10 @@ export default {
   },
   data() {
     return {
-      baseUrl:'',
+      baseUrl: '',
       showEditApp: false,
       showReleaseApp: false,
       showAppDetail: false,
-      InstallType: [
-        {
-          label: '全部',
-          value: '-1',
-        },
-        {
-          label: '已安装',
-          value: '0',
-        },
-        {
-          label: '未安装',
-          value: '1',
-        },
-      ],
-      PublishType: [
-        {
-          label: '全部',
-          value: '-1',
-        },
-        {
-          label: '已发布',
-          value: '0',
-        },
-        {
-          label: '未发布',
-          value: '1',
-        },
-      ],
       Enable: [
         {
           label: '全部',
@@ -139,35 +125,64 @@ export default {
           value: '1',
         },
       ],
+      ResourcesType: [
+        {
+          label: '全部',
+          value: '-1',
+        },
+        {
+          label: '应用',
+          value: '1',
+        },
+        {
+          label: '桌面',
+          value: '2',
+        },
+      ],
       config: {
         tableData: [],
         maxHeight: '10000px',
         tableSetting: [
           {
             prop: 'ApplicationName',
-            label: '应用名称',
-            align:'left',
+            label: '资源名称(面向管理员)',
+            align: 'left',
             slot: 'appName',
           },
           {
-            prop: 'InstallTypeStr',
-            label: '安装状态',
+            prop: 'DisplayName',
+            label: '资源名称(面向用户)',
+            formatter: (row) => {
+              return row.DisplayName || '-'
+            },
           },
           {
-            prop: 'PublishTypeStr',
-            label: '发布状态',
+            prop: 'ResourcesType',
+            label: '资源类型',
+            formatter: (row) => {
+              return row.ResourcesType == 1 ? '应用' : '桌面'
+            },
           },
           {
             prop: 'EnableStr',
             label: '启用状态',
+            style: (row) => {
+              return row.Enable ? { color: '#40c057' } : { color: '#fd7e14' }
+            },
           },
           {
             prop: 'Description',
             label: '说明',
+            formatter: (row) => {
+              return row.Description || '-'
+            },
           },
           {
             prop: 'WorkPath',
             label: '工作目录',
+            formatter: (row) => {
+              return row.ResourcesType == 1 ? row.WorkPath : '-'
+            },
           },
         ],
         operation: {
@@ -176,11 +191,13 @@ export default {
               label: '编辑',
               type: 'text',
               fn: (row) => {
-                this.$http('GetAppDetail', { AppId: row.AppId }).then((res) => {
-                  this.$refs['edit-app'].initFormObj(res.data)
-                }).finally(()=>{
-                  this.showEditApp = true
-                })                
+                this.$http('GetAppDetail', { AppId: row.AppId })
+                  .then((res) => {
+                    this.$refs['edit-app'].initFormObj(res.data,row.ResourcesType)
+                  })
+                  .finally(() => {
+                    this.showEditApp = true
+                  })
               },
             },
             {
@@ -189,7 +206,7 @@ export default {
               fn: (row) => {
                 this.$http('GetAppDetail', { AppId: row.AppId }).then((res) => {
                   this.showAppDetail = true
-                  this.initAppDetail(res.data)
+                  this.initAppDetail(res.data,row.ResourcesType)
                 })
               },
             },
@@ -255,12 +272,13 @@ export default {
             },
           ],
         },
-        map:{
-          data:'items'
+        map: {
+          data: 'items',
         },
         condition: {
           ApplicationName: '',
           Enable: '-1',
+          ResourcesType: '-1',
         },
         fetchUrl: 'GetAppList',
       },
@@ -279,7 +297,12 @@ export default {
       },
     }
   },
-  created() {this.baseUrl = this.$store.getters.symSetting.host},
+  created() {
+    this.baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? this.$store.getters.symSetting.host
+        : '/api'
+  },
   mounted() {
     this.config.maxHeight = document.body.clientHeight - 190 + 'px'
     this.getData()
@@ -289,8 +312,6 @@ export default {
       if (Refresh) {
         this.config.condition = {
           ApplicationName: '',
-          InstallType: '-1',
-          PublishType: '-1',
           Enable: '-1',
         }
       }
@@ -304,43 +325,73 @@ export default {
     },
     Release() {
       this.showReleaseApp = true
-      this.$nextTick(()=>{
+      this.$nextTick(() => {
+        this.$refs['release-app'].handleCommand(
+          this.config.condition.ResourcesType > 0
+            ? this.config.condition.ResourcesType
+            : 1
+        )
         this.$refs['release-app'].getDeliveryGroupData()
       })
     },
-    initAppDetail(data) {
+    initAppDetail(data,type) {
       let temp = []
       for (let i in data) {
         switch (i) {
           case 'ApplicationName':
-            temp.push({ Attribute: '应用名称（面向管理员）', Value: data[i] })
+            temp.push({ Attribute: '资源名称（面向管理员）', Value: data[i] })
             break
           case 'ApplicationDisplayname':
-            temp.push({ Attribute: '应用名称（面向用户）', Value: data[i] })
+            temp.push({ Attribute: '资源名称（面向用户）', Value: data[i] })
+            break
+          case 'ResourcesTypeStr':
+            temp.push({ Attribute: '资源类型', Value: data[i] })
             break
           case 'ExeFullPath':
-            temp.push({ Attribute: '程序路径', Value: data[i] })
+            if (type == 1) {
+              temp.push({ Attribute: '程序路径', Value: data[i] })
+            }
             break
           case 'DeliveryGroups':
-            temp.push({ Attribute: '交付组', Value: data[i].map(item=>{return item.DeliveryGroupName}).join('、') })
+            temp.push({
+              Attribute: '交付组',
+              Value: data[i]
+                .map((item) => {
+                  return item.DeliveryGroupName
+                })
+                .join('、'),
+            })
             break
           case 'CategoryName':
-            temp.push({ Attribute: '分类', Value: data[i] })
-            break
-          case 'DesktopGroupName':
-            temp.push({ Attribute: '交付组名称', Value: data[i] })
+            if (type == 1) {
+              temp.push({ Attribute: '分类', Value: data[i] })
+            }
             break
           case 'ParamsData':
-            temp.push({ Attribute: '环境变量', Value: data[i] })
+            if (type == 1) {
+              temp.push({ Attribute: '环境变量', Value: data[i] })
+            }
             break
           case 'DescriptionStr':
             temp.push({ Attribute: '说明', Value: data[i] })
             break
           case 'Accounts':
-            temp.push({ Attribute: '可见用户', Value: data[i].length>0?data[i].map(item=>{return item.Name}).join('、'):'全部' })
+            temp.push({
+              Attribute: '可见用户',
+              Value:
+                data[i].length > 0
+                  ? data[i]
+                      .map((item) => {
+                        return item.Name
+                      })
+                      .join('、')
+                  : '全部',
+            })
             break
           case 'WorkPath':
-            temp.push({ Attribute: '工作目录', Value: data[i] })
+            if (type == 1) {
+              temp.push({ Attribute: '工作目录', Value: data[i] })
+            }
             break
         }
       }

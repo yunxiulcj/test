@@ -1,3 +1,5 @@
 {
-    "host":"http://192.168.1.22:9005"
-  }
+  "projectName":"信创虚拟化",
+  "remoteReturnNum":6,
+  "host":"http://192.168.1.22:9005"
+}

@@ -4,7 +4,7 @@
       <div class="logo">
         <img src="../assets/img/logo_head.png" width="130px" />
       </div>
-      <div class="appName">信创虚拟化</div>
+      <div class="appName">{{projectName}}</div>
       <div class="account">
         <span>你好！</span>
         <span class="name">{{ account }}</span>
@@ -65,6 +65,7 @@ export default {
   name: 'homeFrame',
   data() {
     return {
+      projectName:'',
       activeIndex: '',
       account: '',
     }
@@ -76,6 +77,7 @@ export default {
   },
   created() {
     this.activeIndex = this.$route.fullPath
+    this.projectName=this.$store.getters.symSetting.projectName
   },
   mounted(){
     this.account=localStorage.getItem('account')

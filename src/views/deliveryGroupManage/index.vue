@@ -82,7 +82,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="用户" prop="Users">
+        <el-form-item label="用户">
           <el-select
             v-model="formObj.Users"
             multiple
@@ -116,7 +116,7 @@
             :loading="computerLoading"
             style="width: 300px"
             :disabled="dialogType == 0"
-            value-key="Id"
+            value-key="DnsName"
           >
             <template v-for="item in machines">
               <el-option :key="item.Id" :label="item.DnsName" :value="item">
@@ -139,7 +139,7 @@
         </el-button>
       </span>
     </el-dialog>
-    <el-dialog :visible.sync="showSessionDetail">
+    <el-dialog :visible.sync="showSessionDetail" width="65%">
       <template slot="title">
         <div
           style="
@@ -194,15 +194,7 @@ export default {
           { required: true, message: '请输入交付组名称', trigger: 'blur' },
         ],
         DeliveryGroupTypeStr: [
-          { required: true, message: '请输入交付类型', trigger: 'blur' },
-        ],
-        Users: [
-          {
-            type: 'array',
-            required: true,
-            message: '请选择用户',
-            trigger: 'change',
-          },
+          { required: true, message: '请选择交付类型', trigger: 'blur' },
         ],
         Machines: [
           {
@@ -233,17 +225,18 @@ export default {
             prop: 'SessionCount',
             label: '会话情况',
             click: (row) => {
-              if(row.SessionCount>0){
+              if (row.SessionCount > 0) {
                 this.showSessionDetail = true
-              this.sessionConfig.condition.DeliveryGroupId = row.DeliveryGroupId
-              this.sessionConfig.condition.MachineDNSName = row.MachineDNSName
-              this.$nextTick(() => {
-                this.$refs['sessionTable'].fetch()
-              })
+                this.sessionConfig.condition.DeliveryGroupId =
+                  row.DeliveryGroupId
+                this.sessionConfig.condition.MachineDNSName = row.MachineDNSName
+                this.$nextTick(() => {
+                  this.$refs['sessionTable'].fetch()
+                })
               }
             },
             style: (row) => {
-              return row.SessionCount>0
+              return row.DeliveryGroupId && row.SessionCount > 0
                 ? {
                     color: '#228be6',
                     textDecoration: 'underline',
@@ -276,7 +269,7 @@ export default {
                     }
                   })
                   res.data['DeliveryGroupId'] = row.DeliveryGroupId
-                  res.data['DeliveryGroupTypeStr'] = row.DelivertGroupTypeStr
+                  res.data['DeliveryGroupTypeStr'] = res.data.DelivertGroupTypeStr
                   this.$set(this, 'formObj', res.data)
                   this.users = res.data.Users
                   this.machines = res.data.Machines
@@ -301,7 +294,7 @@ export default {
                     }
                   })
                   res.data['DeliveryGroupId'] = row.DeliveryGroupId
-                  res.data['DeliveryGroupTypeStr'] = row.DelivertGroupTypeStr
+                  res.data['DeliveryGroupTypeStr'] = res.data.DelivertGroupTypeStr
                   this.$set(this, 'formObj', res.data)
                   this.users = res.data.Users
                   this.machines = res.data.Machines
@@ -503,9 +496,9 @@ export default {
     getComputer(query) {
       this.computerLoading = true
       this.$http('GetDataList', {
-        DataType: 1,
+        DataType: 3,
         LikeName: query,
-        ItemsCount: 999,
+        ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
       })
         .then((res) => {
           this.machines = res.items.map((item) => {
@@ -521,7 +514,7 @@ export default {
         this.userLoading = true
         this.$http('GetUserANDUserGroup', {
           LikeName: query,
-          ItemsCount: 5,
+          ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
           DataType: -1,
         })
           .then((res) => {
@@ -559,7 +552,11 @@ export default {
     },
     getDeliveryGroup(val) {
       this.loading1 = true
-      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: 5 })
+      this.$http('GetDataList', {
+        DataType: 0,
+        LikeName: val,
+        ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
+      })
         .then((res) => {
           this.DeliveryGroupList = res.items
         })

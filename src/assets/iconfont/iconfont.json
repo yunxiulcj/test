@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "5260061",
+      "name": "桌面管理-01",
+      "font_class": "desktopManage",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "27285354",
+      "name": "资源管理",
+      "font_class": "resourceManage",
+      "unicode": "e78d",
+      "unicode_decimal": 59277
+    },
+    {
       "icon_id": "4511910",
       "name": "用户管理",
       "font_class": "userManage",

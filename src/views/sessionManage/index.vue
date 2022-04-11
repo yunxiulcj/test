@@ -123,6 +123,9 @@ export default {
           {
             prop: 'SessionStatusStr',
             label: '会话状态',
+            style:(row)=>{
+              return row.ConnectionState==1 ? {color:'#40c057'}:{color:'#f03e3e'}
+            }
           },
           {
             prop: 'SessionStartTime',
@@ -147,6 +150,7 @@ export default {
               label: '断开',
               type: 'text',
               style: { color: '#f03e3e' },
+              show:(row)=>{return row.ConnectionState==1},
               fn: (row) => {
                 console.log(row)
                 this.$confirm(`是否要断开该会话?`, '提示', {
@@ -193,7 +197,7 @@ export default {
           DeliveryGroupId: '',
           MachineDNSName: '',
           UserName: '',
-          SessionStatus: '',
+          SessionStatus: '-1',
         },
          map:{
           data:'items',
@@ -240,7 +244,7 @@ export default {
         this.userLoading = true
         this.$http('GetUserANDUserGroup', {
           LikeName: query,
-          ItemsCount: 5,
+          ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
           DataType:-1
         })
           .then((res) => {
@@ -260,12 +264,12 @@ export default {
     },
     remoteComputer(query) {
       if (query != '') {
-        this.getComputer()
+        this.getComputer(query)
       }
     },
     getComputer(query) {
       this.computerLoading = true
-      this.$http('GetDataList', { DataType: 1, LikeName: query, ItemsCount: 5 })
+      this.$http('GetDataList', { DataType: 1, LikeName: query, ItemsCount: this.$store.getters.symSetting.remoteReturnNum })
         .then((res) => {
           this.machines = res.items
         })
@@ -280,7 +284,7 @@ export default {
     },
     getDeliveryGroup(val) {
       this.loading1 = true
-      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: 5 })
+      this.$http('GetDataList', { DataType: 0, LikeName: val, ItemsCount: this.$store.getters.symSetting.remoteReturnNum })
         .then((res) => {
           this.DeliveryGroupList = res.items
         })

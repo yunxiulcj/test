@@ -85,7 +85,7 @@ export default {
                 return row.AccountStatus == 0
               },
               fn: (row) => {
-                this.$confirm(`是否要断开该用户?`, '提示', {
+                this.$confirm(`是否要禁用该用户?`, '提示', {
                   confirmButtonText: '确定',
                   cancelButtonText: '取消',
                   type: 'warning',
@@ -145,10 +145,14 @@ export default {
       if (isExist) {
         this.$message.warning('该用户已存在列表')
       } else {
-          this.$http('AddorEditAdminUser', this.formObj).then((res) => {
-            this.$message.success(res.errMsg)
-            this.getData()
-          })
+        this.$http('AddorEditAdminUser', this.formObj).then((res) => {
+          this.$message.success(res.errMsg)
+          this.formObj = {
+            AdminName: '',
+            Remark: '',
+          }
+          this.getData()
+        })
       }
     },
     getData() {
@@ -167,7 +171,7 @@ export default {
         this.userLoading = true
         this.$http('GetUserANDUserGroup', {
           LikeName: query,
-          ItemsCount: 5,
+          ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
           DataType: -1,
         })
           .then((res) => {
@@ -189,4 +193,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.addUser {
+  text-align: right;
+}
+</style>

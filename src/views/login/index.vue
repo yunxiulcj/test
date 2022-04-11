@@ -70,7 +70,7 @@ export default {
       loginLoading:false,
       refleshLoading: false,
       KeepPassword: false,
-      projectName: '信创虚拟化',
+      projectName: '',
       inputType: 'password',
       inputIcon: 'iconfont icon-show',
       formObj: {
@@ -78,7 +78,6 @@ export default {
         password: '',
         captchaCode: '',
       },
-      baseUrl:'',
       formRules: {
         account: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
         password: [
@@ -91,7 +90,7 @@ export default {
     }
   },
   created() {
-    this.baseUrl = this.$store.getters.symSetting.host
+    this.projectName=this.$store.getters.symSetting.projectName
     this.$set(this.formObj,'password',JSON.parse(localStorage.getItem('keepPwd'))?localStorage.getItem('pwd'):'')
   },
   mounted() {
@@ -105,8 +104,7 @@ export default {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.loginLoading=true
-          this.$http('Login',data).then(res=>{
-            this.$message.success(res.errMsg)
+          this.$http('Login',data).then(()=>{
             if(this.KeepPassword){
               localStorage.setItem('keepPwd',true)
               localStorage.setItem('pwd',data.password)

@@ -9,7 +9,30 @@
           padding-left: 10px;
         "
       >
-        发布应用
+        <el-dropdown @command="handleCommand" v-if="stepActive < 3">
+          <span
+            type="primary"
+            plain
+            size="mini"
+            round
+            style="color: #228be6"
+            class="el-dropdown-link"
+          >
+            {{ dialogTitle }}
+            <i class="el-icon-arrow-down el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="1">
+              <i class="iconfont icon-appManage"></i>
+              发布应用
+            </el-dropdown-item>
+            <el-dropdown-item command="2">
+              <i class="iconfont icon-desktopManage"></i>
+              发布桌面
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        <span v-else>{{ dialogTitle }}</span>
       </div>
     </template>
     <div class="stepWrap">
@@ -40,8 +63,12 @@
         ></table-temp>
       </div>
       <div class="stepContent" v-if="stepActive == 2">
-        <el-tabs tab-position="left" v-model="activeName">
-          <el-tab-pane label="从菜单开始" name="menu">
+        <el-tabs
+          tab-position="left"
+          v-model="activeName"
+          v-if="formObj.ResourcesType == 1"
+        >
+          <el-tab-pane label="从开始菜单" name="menu">
             <div class="radioTable">
               <table-temp
                 :config="appConfig"
@@ -50,7 +77,9 @@
               >
                 <template slot-scope="scope" slot="appName">
                   <img :src="baseUrl + scope.row.MenuIcon" width="18px" />
-                  <span style="margin-left:5px">{{ scope.row.DisplayName }}</span>
+                  <span style="margin-left: 5px">{{
+                    scope.row.DisplayName
+                  }}</span>
                 </template>
               </table-temp>
             </div>
@@ -78,13 +107,6 @@
                   clearable
                 ></el-input>
               </el-form-item>
-              <!-- <el-form-item label="工作目录" prop="Directory">
-                <el-input
-                  v-model="formObj.Directory"
-                  placeholder="例：C:\ProgramFiles(x86)\internet explore"
-                  clearable
-                ></el-input>
-              </el-form-item> -->
               <el-form-item
                 label="应用名称(面向用户)"
                 prop="ApplicationDisplayname"
@@ -112,6 +134,37 @@
             </el-form>
           </el-tab-pane>
         </el-tabs>
+        <el-form
+          v-else
+          label-width="160px"
+          label-position="right"
+          ref="desktopForm"
+          :model="formObj"
+          :rules="formRules"
+          size="small"
+        >
+          <el-form-item label="桌面名称(面向管理员)" prop="ApplicationName">
+            <el-input
+              v-model="formObj.ApplicationName"
+              placeholder="请输入面向管理员的桌面名称"
+            ></el-input>
+          </el-form-item>
+          <el-form-item
+            label="桌面名称(面向用户)"
+            prop="ApplicationDisplayname"
+          >
+            <el-input
+              v-model="formObj.ApplicationDisplayname"
+              placeholder="请输入面向用户的桌面名称"
+            ></el-input>
+          </el-form-item>
+          <el-form-item label="说明" prop="DescriptionStr">
+            <el-input
+              v-model="formObj.DescriptionStr"
+              placeholder="请输入说明"
+            ></el-input>
+          </el-form-item>
+        </el-form>
       </div>
       <div class="stepContent" v-if="stepActive == 3">
         <el-radio v-model="userRadio" label="1">所有用户</el-radio>
@@ -142,8 +195,8 @@
                 :label="item.Name"
                 :value="item"
               >
-              <span :class="'iconfont icon-' + item.icon"></span>
-              <span>{{ item.Name }}</span>
+                <span :class="'iconfont icon-' + item.icon"></span>
+                <span>{{ item.Name }}</span>
               </el-option>
             </el-select>
           </el-form-item>
@@ -184,10 +237,11 @@ export default {
   },
   data() {
     return {
-      baseUrl:'',
+      dialogTitle: '',
+      baseUrl: '',
       activeName: 'menu',
-      tempApp:{},
-      tempDeliveryGroup:{},
+      tempApp: {},
+      tempDeliveryGroup: {},
       DeliveryGroup: '',
       loading: false,
       userRadio: '1',
@@ -195,8 +249,8 @@ export default {
       stepActive: 1,
       checkDeliveryGroup: false,
       checkApp: false,
-      userLoading:false,
-      Accounts:[],
+      userLoading: false,
+      Accounts: [],
       formObj: {
         ExeFullPath: '',
         ParamsData: '',
@@ -205,6 +259,7 @@ export default {
         DescriptionStr: '',
         CategoryName: '',
         IconPath: '',
+        ResourcesType: 1,
         Accounts: [],
         DeliveryGroupIds: [],
       },
@@ -304,17 +359,52 @@ export default {
       return this.stepList[this.stepActive - 1].describe
     },
   },
-  created(){
-    this.baseUrl = this.$store.getters.symSetting.host
+  created() {
+    this.baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? this.$store.getters.symSetting.host
+        : '/api'
   },
   mounted() {},
   methods: {
+    handleCommand(val) {
+      if (val == 1) {
+        this.dialogTitle = '发布应用'
+        this.formObj.ResourcesType = 1
+        this.formObj.ApplicationName = ''
+        this.formObj.ApplicationDisplayname = ''
+        this.formObj.DescriptionStr = ''
+        this.stepList[1] = {
+          title: '选择应用',
+          describe: '选择应用',
+          icon: 'ChooseToApp',
+        }
+        if (this.stepActive == 2) {
+          this.GetOpeningMenuApi()
+        }
+      } else {
+        this.dialogTitle = '发布桌面'
+        this.formObj.ResourcesType = 2
+        this.formObj.ApplicationName = ''
+        this.formObj.ApplicationDisplayname = ''
+        this.formObj.DescriptionStr = ''
+        this.formObj.IconPath = ''
+        this.formObj.ExeFullPath=''
+        this.formObj.ParamsData=''
+        this.CategoryName=''
+        this.stepList[1] = {
+          title: '桌面属性',
+          describe: '桌面属性',
+          icon: 'desktopManage',
+        }
+      }
+    },
     remoteUser(query) {
       if (query != '') {
         this.loading = true
         this.$http('GetUserANDUserGroup', {
           LikeName: query,
-          ItemsCount: 5,
+          ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
           DataType: -1,
         })
           .then((res) => {
@@ -345,7 +435,7 @@ export default {
       }
       if (row) {
         this.checkDeliveryGroup = true
-        this.tempDeliveryGroup=row
+        this.tempDeliveryGroup = row
         this.$refs['deliveryGroup'].toggleRowSelection(row, true)
         this.formObj.DeliveryGroupIds = [row.Value]
         this.appConfig.condition.DeliveryGroupId = row.Value
@@ -363,20 +453,20 @@ export default {
       if (row) {
         this.checkApp = true
         this.$refs['appTable'].toggleRowSelection(row, true)
-        this.tempApp=row
+        this.tempApp = row
         this.formObj.ExeFullPath = row.CommandLineExecutable
         this.formObj.ParamsData = row.CommandLineArguments
         this.formObj.ApplicationDisplayname = row.DisplayName
         this.formObj.ApplicationName = row.DisplayName
         this.formObj.DescriptionStr = row.Description
-        this.formObj.IconPath = row.IconPath
+        this.formObj.IconPath = row.MenuIcon
       }
     },
     getDeliveryGroupData() {
       this.$http('GetDataList', {
         DataType: 0,
         LikeName: '',
-        ItemsCount: 999,
+        ItemsCount: this.$store.getters.symSetting.remoteReturnNum,
       }).then((res) => {
         this.DeliveryGroupConfig.tableData = res.items
       })
@@ -388,39 +478,38 @@ export default {
             this.$message.warning('请选择至少一个交付组')
           } else {
             this.stepActive += 1
-            // if(this.checkApp){
-            //   this.$refs['deliveryGroup'].toggleRowSelection(this.tempApp, true)
-            // }
-            this.GetOpeningMenuApi()
+            if (this.activeName == 'menu' && this.formObj.ResourcesType == 1) {
+              this.GetOpeningMenuApi()
+            }
           }
           break
         case 2:
-          if (this.activeName == 'manual') {
-            this.$refs['manualForm'].validate((valid) => {
+          if (this.formObj.ResourcesType == 1) {
+            if (this.activeName == 'manual') {
+              this.$refs['manualForm'].validate((valid) => {
+                if (valid) {
+                  this.stepActive += 1
+                }
+              })
+            } else {
+              if (this.checkApp) {
+                this.stepActive += 1
+              } else {
+                this.$message.warning('请选择发布的应用')
+              }
+            }
+          } else {
+            this.$refs['desktopForm'].validate((valid) => {
               if (valid) {
                 this.stepActive += 1
               }
             })
-          } else {
-            if (this.checkApp) {
-              this.stepActive += 1
-            } else {
-              this.$message.warning('请选择发布的应用')
-            }
           }
           break
       }
     },
     lastStep() {
-      
-      // if(this.stepActive==3 && this.checkApp){
-      //   this.stepActive -= 1
-      //   this.$refs['deliveryGroup'].toggleRowSelection(this.tempApp, true)
-      // }
-      // if(this.stepActive==2 && this.checkDeliveryGroup){
-      //   this.stepActive -= 1
-      //   this.$refs['appTable'].toggleRowSelection(this.tempDeliveryGroup, true)
-      // }
+      this.stepActive -= 1
     },
     confirm() {
       if (this.userRadio == 1) {
@@ -432,11 +521,37 @@ export default {
       }
       this.$http('PublishApp', this.formObj).then((res) => {
         this.$message.success(res.errMsg)
-        this.$emit('getDataFlag',false)
+        this.stepActive = 1
+        this.activeName = 'menu'
+        this.formObj = {
+          ExeFullPath: '',
+          ParamsData: '',
+          ApplicationDisplayname: '',
+          ApplicationName: '',
+          DescriptionStr: '',
+          CategoryName: '',
+          IconPath: '',
+          Accounts: [],
+          DeliveryGroupIds: [],
+        }
+        this.$emit('getDataFlag', false)
         this.$emit('input', false)
       })
     },
     dialogClose() {
+      this.formObj = {
+        ExeFullPath: '',
+        ParamsData: '',
+        ApplicationDisplayname: '',
+        ApplicationName: '',
+        DescriptionStr: '',
+        CategoryName: '',
+        IconPath: '',
+        Accounts: [],
+        DeliveryGroupIds: [],
+      }
+      this.activeName = 'menu'
+      this.stepActive = 1
       this.$emit('input', false)
     },
   },

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import login from '@/views/login/index'
 import vueSystem from '@/app/vue-system'
 import initialScript from '@/app/initial-script/index'
-import appManage from './modules/appManage'
+import resourceManage from './modules/resourceManage'
 import deliveryGroupManage from './modules/deliveryGroupManage'
 import systemManage from './modules/systemManage'
 import sessionManage from './modules/sessionManage'
@@ -12,7 +12,7 @@ import vmManage from './modules/vmManage'
 Vue.use(vueSystem.router)
 
 const defaultRouter = [
-  ...appManage,
+  ...resourceManage,
   ...deliveryGroupManage,
   ...vmManage,
   ...sessionManage,
@@ -26,7 +26,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: () => import('@/frame/index.vue'),
-    redirect: '/appManage',
+    redirect: '/resourceManage',
     children: [...defaultRouter],
   },
   {
